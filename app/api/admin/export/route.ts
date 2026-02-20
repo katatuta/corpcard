@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Expense } from "@prisma/client";
+
+type ExpenseWithUser = Expense & {
+  user: { nickname: string };
+};
 
 // GET - 전체 사용 내역 CSV 다운로드
 export async function GET() {
@@ -33,7 +38,7 @@ export async function GET() {
     const header = ["가명", "금액(원)", "사용 일자", "사용처", "메모", "입력일시"].join(",");
 
     // CSV 행
-    const rows = expenses.map((e: typeof expenses[number]) => {
+    const rows = expenses.map((e: ExpenseWithUser) => {
       const cols = [
         e.user.nickname,
         e.amount.toString(),
