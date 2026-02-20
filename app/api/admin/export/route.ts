@@ -33,7 +33,7 @@ export async function GET() {
     const header = ["가명", "금액(원)", "사용 일자", "사용처", "메모", "입력일시"].join(",");
 
     // CSV 행
-    const rows = expenses.map((e) => {
+    const rows = expenses.map((e: typeof expenses[number]) => {
       const cols = [
         e.user.nickname,
         e.amount.toString(),
