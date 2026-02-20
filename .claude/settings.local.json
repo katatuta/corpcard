@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(npx create-next-app:*)",
+      "Bash(npx create-next-app@14 . --typescript --tailwind --eslint --app --no-src-dir --import-alias \"@/*\" --yes --force)",
+      "Bash(npm install:*)",
+      "Bash(npx prisma init)",
+      "Bash(powershell -Command:*)",
+      "Bash(findstr:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(node -e:*)",
+      "Bash(npx prisma:*)",
+      "WebFetch(domain:www.prisma.io)",
+      "Bash(node check_limits.js:*)",
+      "Bash(ls:*)",
+      "Bash(npm run build:*)",
+      "Bash(cat:*)"
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum RequestStatus {
+  OPEN       // 모집 중 (승인 합계 < 요청 금액)
+  FULFILLED  // 충족 (승인 합계 >= 요청 금액)
+  CANCELLED  // 요청자가 취소
+  RETURNED   // 사용 후 미사용분 반환 완료
+}
+
+model User {
+  id               String          @id @default(cuid())
+  email            String          @unique
+  password         String
+  nickname         String          @unique
+  role             Role            @default(MEMBER)
+  isActive         Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  expenses         Expense[]
+  limitRequests    LimitRequest[]  @relation("Requester")
+  limitApprovals   LimitApproval[] @relation("Approver")
+
+  @@map("users")
+}
+
+model Expense {
+  id        String   @id @default(cuid())
+  userId    String
+  amount    Int
+  usedAt    DateTime @default(now())
+  merchant  String?
+  memo      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("expenses")
+}
+
+model LimitRequest {
+  id               String          @id @default(cuid())
+  requesterId      String
+  requestedAmount  Int             // 요청 금액 (1만원 단위, 원 기준 저장)
+  approvedTotal    Int             @default(0) // 현재까지 승인된 합계
+  usedAmount       Int             @default(0) // 반환 시 실제 사용된 금액
+  reason           String?
+  status           RequestStatus   @default(OPEN)
+  fulfilledAt      DateTime?       // 충족된 시각
+  returnedAt       DateTime?       // 반환된 시각
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  requester        User            @relation("Requester", fields: [requesterId], references: [id])
+  approvals        LimitApproval[]
+
+  @@map("limit_requests")
+}
+
+model LimitApproval {
+  id             String       @id @default(cuid())
+  requestId      String
+  approverId     String
+  amount         Int          // 승인 금액 (1만원 단위, 원 기준 저장)
+  returnedAmount Int          @default(0) // 반환 시 돌려받은 금액
+  createdAt      DateTime     @default(now())
+  request        LimitRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  approver       User         @relation("Approver", fields: [approverId], references: [id])
+
+  @@unique([requestId, approverId]) // 요청당 1인 1승인
+  @@map("limit_approvals")
+}
+
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("system_configs")
+}
