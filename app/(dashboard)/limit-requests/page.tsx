@@ -198,21 +198,21 @@ function LimitRequestsContent() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div>
+        <div className="flex items-center justify-between gap-3 mb-1">
           <h1 className="text-2xl font-bold text-gray-900">허가 요청</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            개인 한도 초과 시 전체에 요청, 여러 명이 나눠서 승인할 수 있습니다
-          </p>
+          {!showForm && !myOpenRequest && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="shrink-0 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              + 허가 요청
+            </button>
+          )}
         </div>
-        {!showForm && !myOpenRequest && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            + 허가 요청
-          </button>
-        )}
+        <p className="text-sm text-gray-500">
+          개인 한도 초과 시 전체에 요청, 여러 명이 나눠서 승인할 수 있습니다
+        </p>
       </div>
 
       {/* 내 잔여 한도 */}
