@@ -20,7 +20,7 @@ interface LimitRequest {
   approvedTotal: number;
   usedAmount: number;
   reason: string | null;
-  status: "OPEN" | "FULFILLED" | "CANCELLED" | "RETURNED";
+  status: "OPEN" | "PARTIAL" | "FULFILLED" | "CANCELLED" | "RETURNED";
   fulfilledAt: string | null;
   returnedAt: string | null;
   createdAt: string;
@@ -49,10 +49,11 @@ function formatDate(s: string) {
 }
 
 const STATUS_INFO = {
-  OPEN:      { label: "모집 중",  cls: "bg-blue-100 text-blue-700" },
-  FULFILLED: { label: "충족",     cls: "bg-green-100 text-green-700" },
-  CANCELLED: { label: "취소됨",   cls: "bg-gray-100 text-gray-500" },
-  RETURNED:  { label: "반환완료", cls: "bg-gray-100 text-gray-500" },
+  OPEN:      { label: "모집 중",   cls: "bg-blue-100 text-blue-700" },
+  PARTIAL:   { label: "부분 확정", cls: "bg-yellow-100 text-yellow-700" },
+  FULFILLED: { label: "충족",      cls: "bg-green-100 text-green-700" },
+  CANCELLED: { label: "취소됨",    cls: "bg-gray-100 text-gray-500" },
+  RETURNED:  { label: "반환완료",  cls: "bg-gray-100 text-gray-500" },
 };
 
 function ProgressBar({ current, total }: { current: number; total: number }) {
@@ -145,6 +146,15 @@ function LimitRequestsContent() {
   // 요청 취소
   const handleCancel = async (id: string) => {
     await fetch(`/api/limit-requests/${id}/cancel`, { method: "POST" });
+    await fetchAll();
+  };
+
+  // 부분 확정
+  const handleConfirm = async (id: string) => {
+    const res = await fetch(`/api/limit-requests/${id}/confirm`, { method: "POST" });
+    const data = await res.json();
+    if (res.ok) alert(data.message);
+    else alert(data.error);
     await fetchAll();
   };
 
@@ -465,13 +475,19 @@ function LimitRequestsContent() {
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
+                        {req.status === "OPEN" && req.approvedTotal > 0 && (
+                          <button onClick={() => handleConfirm(req.id)}
+                            className="text-xs px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors font-medium">
+                            확정하기
+                          </button>
+                        )}
                         {req.status === "OPEN" && (
                           <button onClick={() => handleCancel(req.id)}
                             className="text-xs px-3 py-1.5 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-lg transition-colors">
                             취소
                           </button>
                         )}
-                        {req.status === "FULFILLED" && (
+                        {(req.status === "FULFILLED" || req.status === "PARTIAL") && (
                           <button onClick={() => handleReturn(req.id)}
                             className="text-xs px-3 py-1.5 bg-yellow-50 text-yellow-700 hover:bg-yellow-100 rounded-lg transition-colors font-medium">
                             반환
@@ -488,8 +504,8 @@ function LimitRequestsContent() {
                         <span>승인 현황</span>
                         <span>
                           {formatMan(req.approvedTotal)} / {formatMan(req.requestedAmount)}
-                          {req.status === "OPEN" && remaining > 0 && (
-                            <span className="text-orange-500 ml-1">({formatMan(remaining)} 부족)</span>
+                          {(req.status === "OPEN" || req.status === "PARTIAL") && remaining > 0 && (
+                            <span className="text-orange-500 ml-1">({formatMan(remaining)} 모집 중)</span>
                           )}
                         </span>
                       </div>
@@ -512,7 +528,7 @@ function LimitRequestsContent() {
 
                     {req.status === "RETURNED" && (
                       <p className="text-xs text-gray-600 mt-2">
-                        실사용 {formatMan(req.usedAmount)} / 반환 {formatMan(req.requestedAmount - req.usedAmount)}
+                        실사용 {formatMan(req.usedAmount)} / 반환 {formatMan(req.approvedTotal - req.usedAmount)}
                       </p>
                     )}
 

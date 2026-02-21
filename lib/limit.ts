@@ -11,22 +11,23 @@ export async function getPersonalLimitInfo(userId: string) {
       _sum: { amount: true },
       where: { userId },
     }),
-    // 내가 승인해준 금액 합계 (FULFILLED or RETURNED 요청에 속한 내 승인)
+    // 내가 승인해준 금액 합계 (PARTIAL, FULFILLED, RETURNED 요청에 속한 내 승인)
     prisma.limitApproval.findMany({
       where: {
         approverId: userId,
-        request: { status: { in: ["FULFILLED", "RETURNED"] } },
+        request: { status: { in: ["PARTIAL", "FULFILLED", "RETURNED"] } },
       },
       select: { amount: true, returnedAmount: true, request: { select: { status: true } } },
     }),
-    // 내가 요청해서 충족된 금액 합계
+    // 내가 요청해서 충족된 금액 합계 (PARTIAL 포함)
     prisma.limitRequest.findMany({
       where: {
         requesterId: userId,
-        status: { in: ["FULFILLED", "RETURNED"] },
+        status: { in: ["PARTIAL", "FULFILLED", "RETURNED"] },
       },
       select: {
         requestedAmount: true,
+        approvedTotal: true,
         usedAmount: true,
         status: true,
         approvals: { select: { amount: true, returnedAmount: true } },
@@ -46,10 +47,15 @@ export async function getPersonalLimitInfo(userId: string) {
   }, 0);
 
   // 내가 요청해서 받은 추가 한도
-  // RETURNED 상태면 실제 사용분(usedAmount)만 인정
+  // RETURNED: 실제 사용분(usedAmount)만 인정
+  // PARTIAL: 현재까지 승인된 금액(approvedTotal)만 인정 (계속 모집 중)
+  // FULFILLED: 전체 요청 금액(requestedAmount) 인정
   const receivedAmount = requests.reduce((sum, r) => {
     if (r.status === "RETURNED") {
       return sum + r.usedAmount;
+    }
+    if (r.status === "PARTIAL") {
+      return sum + r.approvedTotal;
     }
     return sum + r.requestedAmount;
   }, 0);

@@ -39,8 +39,7 @@ export async function GET(request: NextRequest) {
       const requests = await prisma.limitRequest.findMany({
         where: {
           requesterId: { not: session.user.id },
-          status: "OPEN",
-          ...statusFilter,
+          status: statusFilter.status ?? { in: ["OPEN", "PARTIAL"] },
         },
         include: {
           requester: { select: { nickname: true } },
@@ -72,7 +71,7 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: "desc" },
       }),
       prisma.limitRequest.findMany({
-        where: { requesterId: { not: session.user.id }, status: "OPEN" },
+        where: { requesterId: { not: session.user.id }, status: { in: ["OPEN", "PARTIAL"] } },
         include: {
           requester: { select: { nickname: true } },
           approvals: {

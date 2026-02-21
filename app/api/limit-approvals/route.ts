@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     if (limitRequest.requesterId === session.user.id) {
       return NextResponse.json({ error: "본인의 요청에는 승인할 수 없습니다." }, { status: 400 });
     }
-    if (limitRequest.status !== "OPEN") {
+    if (limitRequest.status !== "OPEN" && limitRequest.status !== "PARTIAL") {
       return NextResponse.json({ error: "모집 중인 요청에만 승인할 수 있습니다." }, { status: 400 });
     }
 
@@ -95,13 +95,15 @@ export async function POST(request: NextRequest) {
       });
 
       // 요청 상태 업데이트 (approvedTotal은 requestedAmount를 절대 초과하지 않음)
+      // PARTIAL 상태에서 전액 달성 시 FULFILLED로 자동 전환
       const isFulfilled = newApprovedTotal >= limitRequest.requestedAmount;
+      const nextStatus = isFulfilled ? "FULFILLED" : limitRequest.status; // OPEN 또는 PARTIAL 유지
       const updatedRequest = await tx.limitRequest.update({
         where: { id: requestId },
         data: {
           approvedTotal: newApprovedTotal,
-          status: isFulfilled ? "FULFILLED" : "OPEN",
-          fulfilledAt: isFulfilled ? new Date() : null,
+          status: nextStatus,
+          fulfilledAt: isFulfilled ? new Date() : limitRequest.fulfilledAt,
         },
         include: {
           approvals: {

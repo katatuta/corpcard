@@ -16,6 +16,7 @@ enum Role {
 
 enum RequestStatus {
   OPEN       // 모집 중 (승인 합계 < 요청 금액)
+  PARTIAL    // 부분 확정 (요청자가 현재 승인액으로 확정, 계속 모집 중)
   FULFILLED  // 충족 (승인 합계 >= 요청 금액)
   CANCELLED  // 요청자가 취소
   RETURNED   // 사용 후 미사용분 반환 완료
