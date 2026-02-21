@@ -17,15 +17,15 @@ export async function GET() {
         id: true,
         nickname: true,
         expenses: { select: { amount: true } },
-        // 내가 요청해서 충족/반환된 건
+        // 내가 요청해서 충족/반환된 건 (PARTIAL 포함)
         limitRequests: {
-          where: { status: { in: ["FULFILLED", "RETURNED"] } },
-          select: { requestedAmount: true, usedAmount: true, status: true },
+          where: { status: { in: ["PARTIAL", "FULFILLED", "RETURNED"] } },
+          select: { requestedAmount: true, approvedTotal: true, usedAmount: true, status: true },
         },
-        // 내가 승인해준 건
+        // 내가 승인해준 건 (PARTIAL 포함)
         limitApprovals: {
           where: {
-            request: { status: { in: ["FULFILLED", "RETURNED"] } },
+            request: { status: { in: ["PARTIAL", "FULFILLED", "RETURNED"] } },
           },
           select: {
             amount: true,
@@ -42,10 +42,11 @@ export async function GET() {
     const memberStats = activeUsers.map((user) => {
       const totalUsed = user.expenses.reduce((sum, e) => sum + e.amount, 0);
 
-      // 요청해서 받은 추가 한도
+      // 요청해서 받은 추가 한도 (PARTIAL: approvedTotal 기준, FULFILLED: requestedAmount, RETURNED: usedAmount)
       const receivedAmount = user.limitRequests.reduce((sum, r) => {
         if (r.status === "RETURNED") return sum + r.usedAmount;
-        return sum + r.requestedAmount;
+        if (r.status === "PARTIAL") return sum + r.approvedTotal;
+        return sum + r.requestedAmount; // FULFILLED
       }, 0);
 
       // 승인해준 금액 (차감, 반환분 제외)
