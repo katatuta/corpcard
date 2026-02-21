@@ -143,7 +143,7 @@ export default function ExpensesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">내 사용 내역</h1>
-          <p className="text-sm text-gray-500 mt-1">본인의 카드 사용 내역을 관리하세요</p>
+          <p className="text-sm text-gray-600 mt-1">본인의 카드 사용 내역을 관리하세요</p>
         </div>
         {!showForm && (
           <button
@@ -160,15 +160,15 @@ export default function ExpensesPage() {
         <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-xs text-gray-400 mb-1">개인 실질 한도</p>
+              <p className="text-xs text-gray-600 mb-1">개인 실질 한도</p>
               <p className="text-lg font-bold text-gray-900">{formatAmount(data.effectiveLimit)}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-400 mb-1">내 사용액</p>
+              <p className="text-xs text-gray-600 mb-1">내 사용액</p>
               <p className="text-lg font-bold text-blue-600">{formatAmount(data.totalUsed)}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-400 mb-1">개인 잔여</p>
+              <p className="text-xs text-gray-600 mb-1">개인 잔여</p>
               <p className={`text-lg font-bold ${data.remainingPersonal <= 0 ? "text-red-600" : "text-green-600"}`}>
                 {formatAmount(data.remainingPersonal)}
               </p>
@@ -203,7 +203,7 @@ export default function ExpensesPage() {
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {amountNum > 0 && (
-                <p className={`text-xs mt-1 ${isOverPersonal ? "text-red-500" : "text-gray-400"}`}>
+                <p className={`text-xs mt-1 ${isOverPersonal ? "text-red-500" : "text-gray-600"}`}>
                   {isOverPersonal
                     ? `⚠️ 개인 잔여 한도(${formatAmount(remainingPersonal)})를 초과합니다. 허가 요청이 필요합니다.`
                     : `입력 후 잔여: ${formatAmount(remainingPersonal - amountNum)}`}
@@ -214,7 +214,7 @@ export default function ExpensesPage() {
             {/* 사용 일자 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                사용 일자 <span className="text-gray-400 font-normal">(미입력 시 오늘 날짜 자동 저장)</span>
+                사용 일자 <span className="text-gray-500 font-normal">(미입력 시 오늘 날짜 자동 저장)</span>
               </label>
               <input
                 type="date"
@@ -228,7 +228,7 @@ export default function ExpensesPage() {
             {/* 사용처 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                사용처/상호명 <span className="text-gray-400 font-normal">(선택)</span>
+                사용처/상호명 <span className="text-gray-500 font-normal">(선택)</span>
               </label>
               <input
                 type="text"
@@ -243,7 +243,7 @@ export default function ExpensesPage() {
             {/* 메모 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                메모 <span className="text-gray-400 font-normal">(선택)</span>
+                메모 <span className="text-gray-500 font-normal">(선택)</span>
               </label>
               <input
                 type="text"
@@ -285,11 +285,11 @@ export default function ExpensesPage() {
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <h2 className="text-base font-semibold text-gray-700">사용 내역</h2>
-          <span className="text-sm text-gray-400">총 {data?.expenses.length ?? 0}건</span>
+          <span className="text-sm text-gray-600">총 {data?.expenses.length ?? 0}건</span>
         </div>
 
         {!data?.expenses.length ? (
-          <div className="px-6 py-12 text-center text-gray-400 text-sm">
+          <div className="px-6 py-12 text-center text-gray-600 text-sm">
             아직 등록된 사용 내역이 없습니다.
           </div>
         ) : (
@@ -304,9 +304,9 @@ export default function ExpensesPage() {
                     )}
                   </div>
                   <div className="flex items-center gap-3 mt-1">
-                    <span className="text-xs text-gray-400">{formatDate(expense.usedAt)}</span>
+                    <span className="text-xs text-gray-600">{formatDate(expense.usedAt)}</span>
                     {expense.memo && (
-                      <span className="text-xs text-gray-400 truncate">{expense.memo}</span>
+                      <span className="text-xs text-gray-600 truncate">{expense.memo}</span>
                     )}
                   </div>
                 </div>
@@ -348,7 +348,7 @@ export default function ExpensesPage() {
 
         {data && data.expenses.length > 0 && (
           <div className="px-6 py-4 border-t border-gray-100 flex justify-between items-center bg-gray-50">
-            <span className="text-sm text-gray-500">합계</span>
+            <span className="text-sm text-gray-600">합계</span>
             <span className="text-base font-bold text-gray-900">{formatAmount(data.totalUsed)}</span>
           </div>
         )}

@@ -210,7 +210,7 @@ function LimitRequestsContent() {
             </button>
           )}
         </div>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-600">
           개인 한도 초과 시 전체에 요청, 여러 명이 나눠서 승인할 수 있습니다
         </p>
       </div>
@@ -218,7 +218,7 @@ function LimitRequestsContent() {
       {/* 내 잔여 한도 */}
       {personalInfo && (
         <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm flex items-center justify-between">
-          <span className="text-sm text-gray-500">내 개인 잔여 한도</span>
+          <span className="text-sm text-gray-600">내 개인 잔여 한도</span>
           <span className={`text-lg font-bold ${personalInfo.remainingPersonal <= 0 ? "text-red-600" : "text-green-600"}`}>
             {formatAmount(personalInfo.remainingPersonal)}
           </span>
@@ -229,12 +229,12 @@ function LimitRequestsContent() {
       {showForm && (
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
           <h2 className="text-base font-semibold text-gray-800 mb-1">허가 요청 보내기</h2>
-          <p className="text-xs text-gray-400 mb-4">전체 참여자에게 공개되며, 여러 명이 나눠서 승인할 수 있습니다</p>
+          <p className="text-xs text-gray-600 mb-4">전체 참여자에게 공개되며, 여러 명이 나눠서 승인할 수 있습니다</p>
           <form onSubmit={handleSubmitRequest} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 요청 금액 <span className="text-red-500">*</span>
-                <span className="text-gray-400 font-normal ml-1">(1만원 단위)</span>
+                <span className="text-gray-500 font-normal ml-1">(1만원 단위)</span>
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -246,7 +246,7 @@ function LimitRequestsContent() {
                   placeholder="예: 10"
                   className="w-40 px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <span className="text-sm text-gray-500">만원</span>
+                <span className="text-sm text-gray-600">만원</span>
                 {formAmount && (
                   <span className="text-sm text-blue-600 font-medium">
                     = {formatAmount(parseInt(formAmount || "0") * UNIT)}
@@ -256,7 +256,7 @@ function LimitRequestsContent() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                요청 사유 <span className="text-gray-400 font-normal">(선택)</span>
+                요청 사유 <span className="text-gray-500 font-normal">(선택)</span>
               </label>
               <input
                 type="text"
@@ -329,7 +329,7 @@ function LimitRequestsContent() {
                           <span className="font-semibold text-gray-900">
                             {req.requester?.nickname}
                           </span>
-                          <span className="text-gray-400 text-sm">님의 요청</span>
+                          <span className="text-gray-600 text-sm">님의 요청</span>
                           <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_INFO[req.status].cls}`}>
                             {STATUS_INFO[req.status].label}
                           </span>
@@ -339,16 +339,16 @@ function LimitRequestsContent() {
                             {formatMan(req.requestedAmount)}
                           </span>
                           {req.reason && (
-                            <span className="text-gray-400">— {req.reason}</span>
+                            <span className="text-gray-600">— {req.reason}</span>
                           )}
                         </div>
                       </div>
-                      <span className="text-xs text-gray-300">{formatDate(req.createdAt)}</span>
+                      <span className="text-xs text-gray-500">{formatDate(req.createdAt)}</span>
                     </div>
 
                     {/* 진행 바 */}
                     <div className="mb-3">
-                      <div className="flex justify-between text-xs text-gray-500 mb-1">
+                      <div className="flex justify-between text-xs text-gray-600 mb-1">
                         <span>승인 현황</span>
                         <span>
                           <span className="font-semibold text-green-600">{formatMan(req.approvedTotal)}</span>
@@ -388,7 +388,7 @@ function LimitRequestsContent() {
                     {/* 승인 입력 폼 */}
                     {isApproving && (
                       <div className="mt-3 p-4 bg-gray-50 rounded-xl space-y-3">
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600">
                           <span>
                             내 잔여 한도:{" "}
                             <span className="font-medium text-green-600">
@@ -401,7 +401,7 @@ function LimitRequestsContent() {
                               {formatMan(remaining)}
                             </span>
                           </span>
-                          <span className="text-gray-400">
+                          <span className="text-gray-600">
                             → 최대 <span className="font-semibold text-gray-700">{maxApprove}만원</span> 승인 가능
                           </span>
                         </div>
@@ -416,7 +416,7 @@ function LimitRequestsContent() {
                             placeholder="예: 4"
                             className="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                           />
-                          <span className="text-sm text-gray-500">만원</span>
+                          <span className="text-sm text-gray-600">만원</span>
                           {approvalAmount && (
                             <span className="text-sm text-green-600 font-medium">
                               = {formatAmount(approvalAmountNum)}
@@ -480,11 +480,11 @@ function LimitRequestsContent() {
                       </div>
                     </div>
 
-                    {req.reason && <p className="text-sm text-gray-400 mb-2">사유: {req.reason}</p>}
+                    {req.reason && <p className="text-sm text-gray-600 mb-2">사유: {req.reason}</p>}
 
                     {/* 진행 바 */}
                     <div className="mb-2">
-                      <div className="flex justify-between text-xs text-gray-500 mb-1">
+                      <div className="flex justify-between text-xs text-gray-600 mb-1">
                         <span>승인 현황</span>
                         <span>
                           {formatMan(req.approvedTotal)} / {formatMan(req.requestedAmount)}
@@ -503,7 +503,7 @@ function LimitRequestsContent() {
                           <span key={a.id} className="text-xs bg-green-50 text-green-700 px-2.5 py-1 rounded-full">
                             {a.approver.nickname} {formatMan(a.amount)}
                             {req.status === "RETURNED" && a.returnedAmount > 0 && (
-                              <span className="text-gray-400 ml-1">(반환 {formatMan(a.returnedAmount)})</span>
+                              <span className="text-gray-500 ml-1">(반환 {formatMan(a.returnedAmount)})</span>
                             )}
                           </span>
                         ))}
@@ -511,12 +511,12 @@ function LimitRequestsContent() {
                     )}
 
                     {req.status === "RETURNED" && (
-                      <p className="text-xs text-gray-400 mt-2">
+                      <p className="text-xs text-gray-600 mt-2">
                         실사용 {formatMan(req.usedAmount)} / 반환 {formatMan(req.requestedAmount - req.usedAmount)}
                       </p>
                     )}
 
-                    <p className="text-xs text-gray-300 mt-2">{formatDate(req.createdAt)}</p>
+                    <p className="text-xs text-gray-500 mt-2">{formatDate(req.createdAt)}</p>
                   </div>
                 );
               })
