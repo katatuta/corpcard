@@ -16,7 +16,7 @@ export default function NavBar() {
   const isAdmin = session?.user?.role === "ADMIN";
 
   return (
-    <aside className="w-56 shrink-0 bg-white border-r border-gray-200 min-h-screen flex flex-col">
+    <aside className="hidden md:flex w-56 shrink-0 bg-white border-r border-gray-200 min-h-screen flex-col">
       {/* 로고 */}
       <div className="px-5 py-5 border-b border-gray-100">
         <h1 className="text-lg font-bold text-gray-900">법인카드 관리</h1>
