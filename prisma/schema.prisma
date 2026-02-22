@@ -14,6 +14,11 @@ enum Role {
   MEMBER
 }
 
+enum UserMode {
+  TEAM  // 팀원: 한도 공유·허가 요청 가능
+  SOLO  // 개인: 사용 내역 기록만
+}
+
 enum RequestStatus {
   OPEN       // 모집 중 (승인 합계 < 요청 금액)
   PARTIAL    // 부분 확정 (요청자가 현재 승인액으로 확정, 계속 모집 중)
@@ -28,6 +33,7 @@ model User {
   password         String
   nickname         String          @unique
   role             Role            @default(MEMBER)
+  mode             UserMode        @default(TEAM)
   isActive         Boolean         @default(true)
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt

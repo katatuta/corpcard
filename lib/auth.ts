@@ -44,6 +44,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           nickname: user.nickname,
           role: user.role,
+          mode: user.mode,
         };
       },
     }),
@@ -54,6 +55,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.nickname = user.nickname;
         token.role = user.role;
+        token.mode = user.mode;
       }
       return token;
     },
@@ -62,6 +64,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.nickname = token.nickname as string;
         session.user.role = token.role as string;
+        session.user.mode = token.mode as string;
       }
       return session;
     },

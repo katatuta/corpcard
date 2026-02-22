@@ -4,18 +4,24 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-const navItems = [
+const teamNavItems = [
   { href: "/expenses", label: "내 사용 내역", icon: "💳" },
   { href: "/dashboard", label: "한도 현황", icon: "📊" },
   { href: "/limit-requests", label: "허가 요청", icon: "🔄" },
+];
+
+const soloNavItems = [
+  { href: "/expenses", label: "내 사용 내역", icon: "💳" },
 ];
 
 export default function BottomNav() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === "ADMIN";
+  const isSolo = session?.user?.mode === "SOLO";
 
-  const allItems = isAdmin
+  const navItems = isSolo ? soloNavItems : teamNavItems;
+  const allItems = !isSolo && isAdmin
     ? [...navItems, { href: "/admin", label: "관리자", icon: "⚙️" }]
     : navItems;
 

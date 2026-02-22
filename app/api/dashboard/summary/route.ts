@@ -12,7 +12,7 @@ export async function GET() {
     }
 
     const activeUsers = await prisma.user.findMany({
-      where: { isActive: true },
+      where: { isActive: true, mode: "TEAM" },
       select: {
         id: true,
         nickname: true,

@@ -4,16 +4,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 
-const navItems = [
+const teamNavItems = [
   { href: "/expenses", label: "내 사용 내역", icon: "💳" },
   { href: "/dashboard", label: "전체 한도 현황", icon: "📊" },
   { href: "/limit-requests", label: "허가 요청", icon: "🔄" },
+];
+
+const soloNavItems = [
+  { href: "/expenses", label: "내 사용 내역", icon: "💳" },
 ];
 
 export default function NavBar() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === "ADMIN";
+  const isSolo = session?.user?.mode === "SOLO";
+  const navItems = isSolo ? soloNavItems : teamNavItems;
 
   return (
     <aside className="hidden md:flex w-56 shrink-0 bg-white border-r border-gray-200 min-h-screen flex-col">
@@ -21,6 +27,11 @@ export default function NavBar() {
       <div className="px-5 py-5 border-b border-gray-100">
         <h1 className="text-lg font-bold text-gray-900">법인카드 관리</h1>
         <p className="text-xs text-gray-400 mt-0.5 truncate">{session?.user?.nickname}</p>
+        {isSolo && (
+          <span className="mt-1 inline-block text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+            개인 모드
+          </span>
+        )}
       </div>
 
       {/* 메뉴 */}
@@ -43,7 +54,7 @@ export default function NavBar() {
           );
         })}
 
-        {isAdmin && (
+        {!isSolo && isAdmin && (
           <Link
             href="/admin"
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${

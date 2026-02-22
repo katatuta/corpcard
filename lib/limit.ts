@@ -66,13 +66,13 @@ export async function getPersonalLimitInfo(userId: string) {
   return { totalUsed, effectiveLimit, remainingPersonal, givenAmount, receivedAmount };
 }
 
-// 총 잔여 한도 계산
+// 총 잔여 한도 계산 (TEAM 모드 사용자만 포함)
 export async function getTotalLimitInfo() {
   const [activeCount, totalExpenses] = await Promise.all([
-    prisma.user.count({ where: { isActive: true } }),
+    prisma.user.count({ where: { isActive: true, mode: "TEAM" } }),
     prisma.expense.aggregate({
       _sum: { amount: true },
-      where: { user: { isActive: true } },
+      where: { user: { isActive: true, mode: "TEAM" } },
     }),
   ]);
 

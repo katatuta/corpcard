@@ -46,12 +46,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "올바른 금액을 입력해주세요." }, { status: 400 });
     }
 
+    const isSolo = session.user.mode === "SOLO";
+
     // 1. 개인 실질 잔여 한도 검증
     const { remainingPersonal } = await getPersonalLimitInfo(session.user.id);
     if (amount > remainingPersonal) {
       return NextResponse.json(
         {
-          error: `개인 잔여 한도(${remainingPersonal.toLocaleString("ko-KR")}원)를 초과합니다. 허가 요청 탭에서 한도 요청을 보내세요.`,
+          error: isSolo
+            ? `개인 잔여 한도(${remainingPersonal.toLocaleString("ko-KR")}원)를 초과합니다.`
+            : `개인 잔여 한도(${remainingPersonal.toLocaleString("ko-KR")}원)를 초과합니다. 허가 요청 탭에서 한도 요청을 보내세요.`,
           code: "PERSONAL_LIMIT_EXCEEDED",
           remainingPersonal,
         },
@@ -59,17 +63,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. 총 잔여 한도 검증
-    const { remainingTotal } = await getTotalLimitInfo();
-    if (amount > remainingTotal) {
-      return NextResponse.json(
-        {
-          error: `총 잔여 한도(${remainingTotal.toLocaleString("ko-KR")}원)를 초과합니다.`,
-          code: "TOTAL_LIMIT_EXCEEDED",
-          remainingTotal,
-        },
-        { status: 400 }
-      );
+    // 2. 총 잔여 한도 검증 (팀 모드에서만)
+    if (!isSolo) {
+      const { remainingTotal } = await getTotalLimitInfo();
+      if (amount > remainingTotal) {
+        return NextResponse.json(
+          {
+            error: `총 잔여 한도(${remainingTotal.toLocaleString("ko-KR")}원)를 초과합니다.`,
+            code: "TOTAL_LIMIT_EXCEEDED",
+            remainingTotal,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     const expense = await prisma.expense.create({

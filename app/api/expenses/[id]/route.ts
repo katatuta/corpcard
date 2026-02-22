@@ -48,20 +48,22 @@ export async function PUT(
       );
     }
 
-    // 총 한도 검증 (기존 금액 제외)
-    const { totalLimit } = await getTotalLimitInfo();
-    const allExpenses = await prisma.expense.aggregate({
-      _sum: { amount: true },
-      where: { user: { isActive: true }, NOT: { id: params.id } },
-    });
-    const totalUsedExcluding = allExpenses._sum.amount ?? 0;
-    const totalRemaining = totalLimit - totalUsedExcluding;
+    // 총 한도 검증 (기존 금액 제외, 팀 모드에서만)
+    if (session.user.mode !== "SOLO") {
+      const { totalLimit } = await getTotalLimitInfo();
+      const allExpenses = await prisma.expense.aggregate({
+        _sum: { amount: true },
+        where: { user: { isActive: true }, NOT: { id: params.id } },
+      });
+      const totalUsedExcluding = allExpenses._sum.amount ?? 0;
+      const totalRemaining = totalLimit - totalUsedExcluding;
 
-    if (amount > totalRemaining) {
-      return NextResponse.json(
-        { error: `총 잔여 한도(${totalRemaining.toLocaleString("ko-KR")}원)를 초과합니다.` },
-        { status: 400 }
-      );
+      if (amount > totalRemaining) {
+        return NextResponse.json(
+          { error: `총 잔여 한도(${totalRemaining.toLocaleString("ko-KR")}원)를 초과합니다.` },
+          { status: 400 }
+        );
+      }
     }
 
     const updated = await prisma.expense.update({
