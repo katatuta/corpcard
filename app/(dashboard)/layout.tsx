@@ -3,7 +3,6 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import NavBar from "@/components/NavBar";
 import BottomNav from "@/components/BottomNav";
-import LimitBanner from "@/components/LimitBanner";
 
 export default async function DashboardLayout({
   children,
@@ -13,8 +12,6 @@ export default async function DashboardLayout({
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
 
-  const isTeam = session.user.mode !== "SOLO";
-
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* 사이드바 (PC 전용) */}
@@ -23,8 +20,6 @@ export default async function DashboardLayout({
       {/* 메인 콘텐츠 */}
       <main className="flex-1 p-4 md:p-8 overflow-auto pb-20 md:pb-8">
         <div className="max-w-4xl mx-auto space-y-4">
-          {/* 팀 모드에서만 한도 배너 표시 */}
-          {isTeam && <LimitBanner />}
           {children}
         </div>
       </main>
