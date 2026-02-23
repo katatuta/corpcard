@@ -200,7 +200,7 @@ export default function ExpensesPage() {
                 value={form.amount ? parseInt(form.amount).toLocaleString("ko-KR") : ""}
                 onChange={handleFormChange}
                 placeholder="0"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {amountNum > 0 && (
                 <p className={`text-xs mt-1 ${isOverPersonal ? "text-red-500" : "text-gray-600"}`}>
@@ -221,7 +221,7 @@ export default function ExpensesPage() {
                 name="usedAt"
                 value={form.usedAt}
                 onChange={handleFormChange}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -236,7 +236,7 @@ export default function ExpensesPage() {
                 value={form.merchant}
                 onChange={handleFormChange}
                 placeholder="예: 스타벅스"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -251,7 +251,7 @@ export default function ExpensesPage() {
                 value={form.memo}
                 onChange={handleFormChange}
                 placeholder="메모 입력"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 

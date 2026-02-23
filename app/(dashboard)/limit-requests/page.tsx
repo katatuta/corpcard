@@ -254,7 +254,7 @@ function LimitRequestsContent() {
                   value={formAmount}
                   onChange={(e) => setFormAmount(e.target.value)}
                   placeholder="예: 10"
-                  className="w-40 px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-40 px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <span className="text-sm text-gray-600">만원</span>
                 {formAmount && (
@@ -273,7 +273,7 @@ function LimitRequestsContent() {
                 value={formReason}
                 onChange={(e) => setFormReason(e.target.value)}
                 placeholder="예: 팀 회식 추가 비용"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             {formError && (
@@ -424,7 +424,7 @@ function LimitRequestsContent() {
                             value={approvalAmount}
                             onChange={(e) => { setApprovalAmount(e.target.value); setApprovalError(""); }}
                             placeholder="예: 4"
-                            className="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
                           />
                           <span className="text-sm text-gray-600">만원</span>
                           {approvalAmount && (
