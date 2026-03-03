@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const userMode = mode === "SOLO" ? "SOLO" : "TEAM";
+    const userMode = mode === "TEAM" ? "TEAM" : "SOLO";
 
     const user = await prisma.user.create({
       data: {

@@ -11,7 +11,6 @@ export default function SignupPage() {
     password: "",
     passwordConfirm: "",
     nickname: "",
-    mode: "TEAM" as "TEAM" | "SOLO",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -45,7 +44,7 @@ export default function SignupPage() {
           email: formData.email,
           password: formData.password,
           nickname: formData.nickname,
-          mode: formData.mode,
+          mode: "SOLO",
         }),
       });
 
@@ -92,43 +91,10 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* 사용 목적 (모드 선택) */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                사용 목적
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, mode: "TEAM" })}
-                  className={`px-4 py-3 rounded-lg border-2 text-sm font-medium text-left transition-colors ${
-                    formData.mode === "TEAM"
-                      ? "border-blue-500 bg-blue-50 text-blue-700"
-                      : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
-                  }`}
-                >
-                  <div className="font-semibold mb-0.5">👥 팀원으로 사용</div>
-                  <div className="text-xs opacity-75">한도 공유·허가 요청</div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, mode: "SOLO" })}
-                  className={`px-4 py-3 rounded-lg border-2 text-sm font-medium text-left transition-colors ${
-                    formData.mode === "SOLO"
-                      ? "border-blue-500 bg-blue-50 text-blue-700"
-                      : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
-                  }`}
-                >
-                  <div className="font-semibold mb-0.5">🙋 개인으로 사용</div>
-                  <div className="text-xs opacity-75">사용 내역만 기록</div>
-                </button>
-              </div>
-            </div>
-
             {/* 가명 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                가명{formData.mode === "TEAM" && <span className="text-gray-400 font-normal"> (다른 참여자에게 보이는 이름)</span>}
+                가명
               </label>
               <input
                 type="text"
