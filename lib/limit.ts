@@ -3,13 +3,17 @@ import { prisma } from "@/lib/prisma";
 export const PERSONAL_LIMIT = 400000; // 인당 기본 한도 40만원
 export const UNIT = 10000;            // 1만원 단위
 
-// 특정 유저의 개인 실질 한도 및 잔여 한도 계산
+// 특정 유저의 개인 실질 한도 및 잔여 한도 계산 (이번 달 기준)
 export async function getPersonalLimitInfo(userId: string) {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
   const [expenses, approvals, requests] = await Promise.all([
-    // 본인 사용액
+    // 본인 사용액 (이번 달만)
     prisma.expense.aggregate({
       _sum: { amount: true },
-      where: { userId },
+      where: { userId, usedAt: { gte: startOfMonth, lte: endOfMonth } },
     }),
     // 내가 승인해준 금액 합계 (PARTIAL, FULFILLED, RETURNED 요청에 속한 내 승인)
     prisma.limitApproval.findMany({

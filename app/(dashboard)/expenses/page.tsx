@@ -26,6 +26,20 @@ function formatDate(dateStr: string) {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
 }
 
+function getMonthKey(dateStr: string) {
+  return dateStr.slice(0, 7); // "2025-03"
+}
+
+function getMonthLabel(key: string) {
+  const [year, month] = key.split("-");
+  return `${year}년 ${parseInt(month)}월`;
+}
+
+function getCurrentMonthKey() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
 const emptyForm = { amount: "", usedAt: "", merchant: "", memo: "" };
 
 export default function ExpensesPage() {
@@ -160,15 +174,15 @@ export default function ExpensesPage() {
         <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-xs text-gray-600 mb-1">개인 실질 한도</p>
+              <p className="text-xs text-gray-600 mb-1">이번 달 한도</p>
               <p className="text-lg font-bold text-gray-900">{formatAmount(data.effectiveLimit)}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-600 mb-1">내 사용액</p>
+              <p className="text-xs text-gray-600 mb-1">이번 달 사용액</p>
               <p className="text-lg font-bold text-blue-600">{formatAmount(data.totalUsed)}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-600 mb-1">개인 잔여</p>
+              <p className="text-xs text-gray-600 mb-1">이번 달 잔여</p>
               <p className={`text-lg font-bold ${data.remainingPersonal <= 0 ? "text-red-600" : "text-green-600"}`}>
                 {formatAmount(data.remainingPersonal)}
               </p>
@@ -176,7 +190,7 @@ export default function ExpensesPage() {
           </div>
           {data.remainingPersonal <= 0 && (
             <p className="text-center text-sm text-orange-600 mt-3 font-medium">
-              개인 한도를 초과했습니다. 허가 요청 탭에서 한도 허가를 요청하세요.
+              이번 달 한도를 모두 사용했습니다.
             </p>
           )}
         </div>
@@ -205,7 +219,7 @@ export default function ExpensesPage() {
               {amountNum > 0 && (
                 <p className={`text-xs mt-1 ${isOverPersonal ? "text-red-500" : "text-gray-600"}`}>
                   {isOverPersonal
-                    ? `⚠️ 개인 잔여 한도(${formatAmount(remainingPersonal)})를 초과합니다. 허가 요청이 필요합니다.`
+                    ? `⚠️ 이번 달 잔여 한도(${formatAmount(remainingPersonal)})를 초과합니다.`
                     : `입력 후 잔여: ${formatAmount(remainingPersonal - amountNum)}`}
                 </p>
               )}
@@ -281,78 +295,99 @@ export default function ExpensesPage() {
         </div>
       )}
 
-      {/* 내역 목록 */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-base font-semibold text-gray-700">사용 내역</h2>
-          <span className="text-sm text-gray-600">총 {data?.expenses.length ?? 0}건</span>
+      {/* 내역 목록 (월별 그룹) */}
+      {!data?.expenses.length ? (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-12 text-center text-gray-600 text-sm">
+          아직 등록된 사용 내역이 없습니다.
         </div>
+      ) : (() => {
+        const currentKey = getCurrentMonthKey();
+        const grouped = data.expenses.reduce((acc, e) => {
+          const key = getMonthKey(e.usedAt);
+          if (!acc[key]) acc[key] = [];
+          acc[key].push(e);
+          return acc;
+        }, {} as Record<string, Expense[]>);
+        const monthKeys = Object.keys(grouped).sort().reverse();
 
-        {!data?.expenses.length ? (
-          <div className="px-6 py-12 text-center text-gray-600 text-sm">
-            아직 등록된 사용 내역이 없습니다.
-          </div>
-        ) : (
-          <div className="divide-y divide-gray-100">
-            {data.expenses.map((expense) => (
-              <div key={expense.id} className="px-6 py-4 flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3">
-                    <span className="font-semibold text-gray-900">{formatAmount(expense.amount)}</span>
-                    {expense.merchant && (
-                      <span className="text-sm text-gray-600 truncate">{expense.merchant}</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className="text-xs text-gray-600">{formatDate(expense.usedAt)}</span>
-                    {expense.memo && (
-                      <span className="text-xs text-gray-600 truncate">{expense.memo}</span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 ml-4 shrink-0">
-                  <button
-                    onClick={() => handleEdit(expense)}
-                    className="text-xs px-3 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-                  >
-                    수정
-                  </button>
-                  {deleteConfirmId === expense.id ? (
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => handleDelete(expense.id)}
-                        className="text-xs px-3 py-1.5 text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors"
-                      >
-                        확인
-                      </button>
-                      <button
-                        onClick={() => setDeleteConfirmId(null)}
-                        className="text-xs px-3 py-1.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                      >
-                        취소
-                      </button>
+        return (
+          <div className="space-y-4">
+            {monthKeys.map((key) => {
+              const monthExpenses = grouped[key];
+              const monthTotal = monthExpenses.reduce((s, e) => s + e.amount, 0);
+              const isCurrent = key === currentKey;
+
+              return (
+                <div key={key} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                  {/* 월 헤더 */}
+                  <div className="px-6 py-3 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-gray-700">{getMonthLabel(key)}</span>
+                      {isCurrent && (
+                        <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-medium">이번 달</span>
+                      )}
                     </div>
-                  ) : (
-                    <button
-                      onClick={() => setDeleteConfirmId(expense.id)}
-                      className="text-xs px-3 py-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
-                    >
-                      삭제
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+                    <span className="text-sm font-semibold text-gray-900">{formatAmount(monthTotal)}</span>
+                  </div>
 
-        {data && data.expenses.length > 0 && (
-          <div className="px-6 py-4 border-t border-gray-100 flex justify-between items-center bg-gray-50">
-            <span className="text-sm text-gray-600">합계</span>
-            <span className="text-base font-bold text-gray-900">{formatAmount(data.totalUsed)}</span>
+                  {/* 해당 월 내역 */}
+                  <div className="divide-y divide-gray-100">
+                    {monthExpenses.map((expense) => (
+                      <div key={expense.id} className="px-6 py-4 flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3">
+                            <span className="font-semibold text-gray-900">{formatAmount(expense.amount)}</span>
+                            {expense.merchant && (
+                              <span className="text-sm text-gray-600 truncate">{expense.merchant}</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 mt-1">
+                            <span className="text-xs text-gray-600">{formatDate(expense.usedAt)}</span>
+                            {expense.memo && (
+                              <span className="text-xs text-gray-600 truncate">{expense.memo}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 ml-4 shrink-0">
+                          <button
+                            onClick={() => handleEdit(expense)}
+                            className="text-xs px-3 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                          >
+                            수정
+                          </button>
+                          {deleteConfirmId === expense.id ? (
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => handleDelete(expense.id)}
+                                className="text-xs px-3 py-1.5 text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors"
+                              >
+                                확인
+                              </button>
+                              <button
+                                onClick={() => setDeleteConfirmId(null)}
+                                className="text-xs px-3 py-1.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                              >
+                                취소
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setDeleteConfirmId(expense.id)}
+                              className="text-xs px-3 py-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                            >
+                              삭제
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        )}
-      </div>
+        );
+      })()}
     </div>
   );
 }

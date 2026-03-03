@@ -29,11 +29,18 @@ export async function PUT(
       return NextResponse.json({ error: "올바른 금액을 입력해주세요." }, { status: 400 });
     }
 
-    // 기존 금액을 제외한 개인 잔여 한도 검증
+    // 기존 금액을 제외한 개인 잔여 한도 검증 (이번 달 기준)
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
     const { effectiveLimit } = await getPersonalLimitInfo(session.user.id);
     const myExpenses = await prisma.expense.aggregate({
       _sum: { amount: true },
-      where: { userId: session.user.id, NOT: { id: params.id } },
+      where: {
+        userId: session.user.id,
+        usedAt: { gte: startOfMonth, lte: endOfMonth },
+        NOT: { id: params.id },
+      },
     });
     const myUsedExcluding = myExpenses._sum.amount ?? 0;
     const remainingPersonal = effectiveLimit - myUsedExcluding;
