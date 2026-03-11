@@ -11,21 +11,11 @@ interface Member {
   role: "ADMIN" | "MEMBER";
   isActive: boolean;
   createdAt: string;
-  totalUsed: number;
-  effectiveLimit: number;
-  remainingPersonal: number;
 }
 
 interface AdminSummary {
   activeCount: number;
   totalCount: number;
-  totalLimit: number;
-  totalUsed: number;
-  remainingTotal: number;
-}
-
-function formatAmount(n: number) {
-  return n.toLocaleString("ko-KR") + "원";
 }
 
 function formatDate(s: string) {
@@ -40,17 +30,11 @@ export default function AdminPage() {
   const [summary, setSummary] = useState<AdminSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [warningModal, setWarningModal] = useState<{
-    memberId: string;
-    message: string;
-    currentTotalUsed: number;
-    newTotalLimit: number;
-  } | null>(null);
 
   // 관리자 아닌 경우 리다이렉트
   useEffect(() => {
     if (status === "authenticated" && session?.user?.role !== "ADMIN") {
-      router.push("/dashboard");
+      router.push("/expenses");
     }
   }, [status, session, router]);
 
@@ -80,23 +64,10 @@ export default function AdminPage() {
         body: JSON.stringify({ action: "toggleActive" }),
       });
       const data = await res.json();
-
-      if (res.status === 409 && data.warning) {
-        // 한도 초과 경고 모달
-        setWarningModal({
-          memberId,
-          message: data.error,
-          currentTotalUsed: data.currentTotalUsed,
-          newTotalLimit: data.newTotalLimit,
-        });
-        return;
-      }
-
       if (!res.ok) {
         alert(data.error || "처리에 실패했습니다.");
         return;
       }
-
       await fetchMembers();
     } finally {
       setActionLoading(null);
@@ -122,10 +93,6 @@ export default function AdminPage() {
     }
   };
 
-  const handleExportCSV = () => {
-    window.open("/api/admin/export", "_blank");
-  };
-
   if (status === "loading" || loading) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-500">
@@ -139,41 +106,23 @@ export default function AdminPage() {
   return (
     <div className="space-y-6">
       {/* 헤더 */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">관리자</h1>
-          <p className="text-sm text-gray-500 mt-1">참여자 관리 및 데이터 내보내기</p>
-        </div>
-        <button
-          onClick={handleExportCSV}
-          className="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium rounded-lg transition-colors"
-        >
-          CSV 내보내기
-        </button>
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">관리자</h1>
+        <p className="text-sm text-gray-500 mt-1">참여자 계정을 관리하세요</p>
       </div>
 
       {/* 전체 현황 요약 */}
       {summary && (
         <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-gray-500 mb-4">전체 현황</h2>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="text-center">
               <p className="text-xs text-gray-400 mb-1">활성 참여자</p>
               <p className="text-xl font-bold text-gray-900">{summary.activeCount}명</p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-gray-400 mb-1">총 한도</p>
-              <p className="text-xl font-bold text-gray-900">{formatAmount(summary.totalLimit)}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-xs text-gray-400 mb-1">총 사용액</p>
-              <p className="text-xl font-bold text-blue-600">{formatAmount(summary.totalUsed)}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-xs text-gray-400 mb-1">잔여 한도</p>
-              <p className={`text-xl font-bold ${summary.remainingTotal <= 0 ? "text-red-600" : "text-green-600"}`}>
-                {formatAmount(summary.remainingTotal)}
-              </p>
+              <p className="text-xs text-gray-400 mb-1">전체 참여자</p>
+              <p className="text-xl font-bold text-gray-900">{summary.totalCount}명</p>
             </div>
           </div>
         </div>
@@ -189,16 +138,13 @@ export default function AdminPage() {
         <div className="divide-y divide-gray-100">
           {members.map((member) => {
             const isMe = member.id === session?.user?.id;
-            const usageRate = member.effectiveLimit > 0
-              ? Math.round((member.totalUsed / member.effectiveLimit) * 100)
-              : 0;
 
             return (
               <div
                 key={member.id}
                 className={`px-6 py-4 ${!member.isActive ? "opacity-50" : ""} ${isMe ? "bg-blue-50" : ""}`}
               >
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center justify-between gap-4">
                   {/* 좌측: 사용자 정보 */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5 flex-wrap">
@@ -217,20 +163,7 @@ export default function AdminPage() {
                         <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">비활성</span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-400 mb-2">{member.email} · 가입 {formatDate(member.createdAt)}</p>
-
-                    {/* 사용량 바 */}
-                    <div className="flex items-center gap-3">
-                      <div className="flex-1 bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                        <div
-                          className={`h-1.5 rounded-full ${usageRate >= 100 ? "bg-red-500" : usageRate >= 80 ? "bg-orange-400" : "bg-blue-500"}`}
-                          style={{ width: `${Math.min(usageRate, 100)}%` }}
-                        />
-                      </div>
-                      <span className="text-xs text-gray-500 shrink-0">
-                        {formatAmount(member.totalUsed)} / {formatAmount(member.effectiveLimit)}
-                      </span>
-                    </div>
+                    <p className="text-xs text-gray-400">{member.email} · 가입 {formatDate(member.createdAt)}</p>
                   </div>
 
                   {/* 우측: 액션 버튼 */}
@@ -266,66 +199,6 @@ export default function AdminPage() {
           })}
         </div>
       </div>
-
-      {/* 한도 초과 경고 모달 */}
-      {warningModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">⚠️ 한도 초과 경고</h3>
-            <p className="text-sm text-gray-600 mb-4">{warningModal.message}</p>
-            <div className="bg-orange-50 rounded-xl p-4 mb-5 text-sm space-y-1">
-              <div className="flex justify-between">
-                <span className="text-gray-500">현재 총 사용액</span>
-                <span className="font-semibold text-gray-900">{formatAmount(warningModal.currentTotalUsed)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">변경 후 총 한도</span>
-                <span className="font-semibold text-red-600">{formatAmount(warningModal.newTotalLimit)}</span>
-              </div>
-              <div className="flex justify-between border-t border-orange-200 pt-1 mt-1">
-                <span className="text-gray-500">초과분</span>
-                <span className="font-semibold text-red-600">
-                  {formatAmount(warningModal.currentTotalUsed - warningModal.newTotalLimit)}
-                </span>
-              </div>
-            </div>
-            <p className="text-xs text-gray-400 mb-5">
-              비활성화 후 신규 사용 내역 입력이 차단됩니다. 기존 내역은 유지됩니다.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={async () => {
-                  const id = warningModal.memberId;
-                  setWarningModal(null);
-                  // 경고를 확인하고 강제 비활성화 — 별도 force 파라미터 없이 서버에서 바로 처리
-                  setActionLoading(id);
-                  try {
-                    // 한도 초과 상태에서도 비활성화 가능하도록 별도 엔드포인트 없이
-                    // 관리자가 확인 후 직접 DB 조작 대신 force flag로 재요청
-                    await fetch(`/api/admin/members/${id}`, {
-                      method: "PATCH",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ action: "toggleActive", force: true }),
-                    });
-                    await fetchMembers();
-                  } finally {
-                    setActionLoading(null);
-                  }
-                }}
-                className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg text-sm transition-colors"
-              >
-                그래도 비활성화
-              </button>
-              <button
-                onClick={() => setWarningModal(null)}
-                className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition-colors"
-              >
-                취소
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
