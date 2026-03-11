@@ -24,6 +24,7 @@ export async function GET() {
       expenses,
       totalUsed: limitInfo.totalUsed,
       effectiveLimit: limitInfo.effectiveLimit,
+      monthlyLimit: limitInfo.monthlyLimit,
       remainingPersonal: limitInfo.remainingPersonal,
     });
   } catch (error) {

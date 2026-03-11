@@ -17,7 +17,7 @@ export default function NavBar() {
     <aside className="hidden md:flex w-56 shrink-0 bg-white border-r border-gray-200 min-h-screen flex-col">
       {/* 로고 */}
       <div className="px-5 py-5 border-b border-gray-100">
-        <h1 className="text-lg font-bold text-gray-900">법인카드 관리</h1>
+        <h1 className="text-lg font-bold text-gray-900">카드 지출 관리</h1>
         <p className="text-xs text-gray-400 mt-0.5 truncate">{session?.user?.nickname}</p>
       </div>
 

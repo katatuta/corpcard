@@ -14,6 +14,7 @@ interface ExpenseData {
   expenses: Expense[];
   totalUsed: number;
   effectiveLimit: number;
+  monthlyLimit: number;
   remainingPersonal: number;
 }
 
@@ -51,6 +52,10 @@ export default function ExpensesPage() {
   const [formError, setFormError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [editingLimit, setEditingLimit] = useState(false);
+  const [limitInput, setLimitInput] = useState("");
+  const [limitSaving, setLimitSaving] = useState(false);
+  const [limitError, setLimitError] = useState("");
 
   const fetchExpenses = useCallback(async () => {
     try {
@@ -143,6 +148,39 @@ export default function ExpensesPage() {
     setFormError("");
   };
 
+  const handleLimitEdit = () => {
+    setLimitInput(String(data?.monthlyLimit ?? ""));
+    setLimitError("");
+    setEditingLimit(true);
+  };
+
+  const handleLimitSave = async () => {
+    const value = parseInt(limitInput.replace(/,/g, ""), 10);
+    if (!value || value <= 0) {
+      setLimitError("올바른 금액을 입력해주세요.");
+      return;
+    }
+    setLimitSaving(true);
+    try {
+      const res = await fetch("/api/user/limit", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ monthlyLimit: value }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        setLimitError(d.error || "저장에 실패했습니다.");
+        return;
+      }
+      setEditingLimit(false);
+      await fetchExpenses();
+    } catch {
+      setLimitError("서버 오류가 발생했습니다.");
+    } finally {
+      setLimitSaving(false);
+    }
+  };
+
   const amountNum = parseInt(form.amount || "0", 10);
   const remainingPersonal = data?.remainingPersonal ?? 0;
   const isOverPersonal = amountNum > 0 && amountNum > remainingPersonal + (editingId
@@ -174,8 +212,52 @@ export default function ExpensesPage() {
         <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-xs text-gray-600 mb-1">이번 달 한도</p>
-              <p className="text-lg font-bold text-gray-900">{formatAmount(data.effectiveLimit)}</p>
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <p className="text-xs text-gray-600">이번 달 한도</p>
+                {!editingLimit && (
+                  <button
+                    onClick={handleLimitEdit}
+                    className="text-gray-400 hover:text-blue-500 transition-colors"
+                    title="한도 설정"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              {editingLimit ? (
+                <div className="space-y-1.5">
+                  <input
+                    type="text"
+                    value={limitInput ? parseInt(limitInput).toLocaleString("ko-KR") : ""}
+                    onChange={(e) => {
+                      setLimitInput(e.target.value.replace(/[^0-9]/g, ""));
+                      setLimitError("");
+                    }}
+                    placeholder="금액 입력"
+                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                  {limitError && <p className="text-xs text-red-500">{limitError}</p>}
+                  <div className="flex gap-1">
+                    <button
+                      onClick={handleLimitSave}
+                      disabled={limitSaving}
+                      className="flex-1 py-1 text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded transition-colors"
+                    >
+                      {limitSaving ? "저장 중" : "저장"}
+                    </button>
+                    <button
+                      onClick={() => setEditingLimit(false)}
+                      className="flex-1 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors"
+                    >
+                      취소
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-lg font-bold text-gray-900">{formatAmount(data.effectiveLimit)}</p>
+              )}
             </div>
             <div>
               <p className="text-xs text-gray-600 mb-1">이번 달 사용액</p>

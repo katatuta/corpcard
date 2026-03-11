@@ -15,8 +15,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "법인카드 관리",
-  description: "법인카드 한도 관리 시스템",
+  title: "카드 지출 관리",
+  description: "카드 지출 기록 및 한도 관리",
 };
 
 export default function RootLayout({
