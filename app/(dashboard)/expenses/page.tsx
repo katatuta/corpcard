@@ -237,6 +237,7 @@ export default function ExpensesPage() {
                     }}
                     placeholder="금액 입력"
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm text-center text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    style={{ WebkitTextFillColor: '#111827' }}
                   />
                   {limitError && <p className="text-xs text-red-500">{limitError}</p>}
                   <div className="flex gap-1">
