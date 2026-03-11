@@ -50,7 +50,7 @@ function LoginForm() {
       <div className="max-w-md w-full">
         {/* 헤더 */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">법인카드 관리</h1>
+          <h1 className="text-3xl font-bold text-gray-900">카드 지출 관리</h1>
           <p className="mt-2 text-gray-600">계정에 로그인하세요</p>
         </div>
 

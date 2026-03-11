@@ -34,6 +34,7 @@ model User {
   nickname         String          @unique
   role             Role            @default(MEMBER)
   mode             UserMode        @default(TEAM)
+  monthlyLimit     Int             @default(400000) // 개인 월 한도 (원)
   isActive         Boolean         @default(true)
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt

@@ -9,17 +9,20 @@ export async function getPersonalLimitInfo(userId: string) {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 
-  // 이번 달 사용액만 집계
-  const expenses = await prisma.expense.aggregate({
-    _sum: { amount: true },
-    where: { userId, usedAt: { gte: startOfMonth, lte: endOfMonth } },
-  });
+  // 유저의 개인 한도 및 이번 달 사용액 조회
+  const [user, expenses] = await Promise.all([
+    prisma.user.findUnique({ where: { id: userId }, select: { monthlyLimit: true } }),
+    prisma.expense.aggregate({
+      _sum: { amount: true },
+      where: { userId, usedAt: { gte: startOfMonth, lte: endOfMonth } },
+    }),
+  ]);
 
   const totalUsed = expenses._sum.amount ?? 0;
-  const effectiveLimit = PERSONAL_LIMIT; // 매달 기본 한도로 리셋
+  const effectiveLimit = user?.monthlyLimit ?? PERSONAL_LIMIT;
   const remainingPersonal = effectiveLimit - totalUsed;
 
-  return { totalUsed, effectiveLimit, remainingPersonal, givenAmount: 0, receivedAmount: 0 };
+  return { totalUsed, effectiveLimit, monthlyLimit: effectiveLimit, remainingPersonal, givenAmount: 0, receivedAmount: 0 };
 }
 
 // 총 잔여 한도 계산 (TEAM 모드 사용자만 포함)

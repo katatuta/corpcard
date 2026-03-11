@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "users" ADD COLUMN "monthlyLimit" INTEGER NOT NULL DEFAULT 400000;
