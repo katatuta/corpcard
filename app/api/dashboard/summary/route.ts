@@ -11,12 +11,19 @@ export async function GET() {
       return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 });
     }
 
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
     const activeUsers = await prisma.user.findMany({
       where: { isActive: true, mode: "TEAM" },
       select: {
         id: true,
         nickname: true,
-        expenses: { select: { amount: true } },
+        expenses: {
+          where: { usedAt: { gte: startOfMonth, lte: endOfMonth } },
+          select: { amount: true },
+        },
         // 내가 요청해서 충족/반환된 건 (PARTIAL 포함)
         limitRequests: {
           where: { status: { in: ["PARTIAL", "FULFILLED", "RETURNED"] } },
