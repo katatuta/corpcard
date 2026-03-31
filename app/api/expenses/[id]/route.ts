@@ -60,7 +60,7 @@ export async function PUT(
       const { totalLimit } = await getTotalLimitInfo();
       const allExpenses = await prisma.expense.aggregate({
         _sum: { amount: true },
-        where: { user: { isActive: true }, NOT: { id: params.id } },
+        where: { user: { isActive: true }, usedAt: { gte: startOfMonth, lte: endOfMonth }, NOT: { id: params.id } },
       });
       const totalUsedExcluding = allExpenses._sum.amount ?? 0;
       const totalRemaining = totalLimit - totalUsedExcluding;
